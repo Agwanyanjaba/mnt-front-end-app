@@ -28,6 +28,7 @@ const Search = () => {
       }
     );
 
+    console.log("The search URL "+url);
     router.push(url);
   };
 

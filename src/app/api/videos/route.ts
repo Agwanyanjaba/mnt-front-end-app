@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     pipeline: [
       {
         $search: {
-          index: "default",
+          index: "vid_search_index",
           text: {
             query: searchQuery,
             path: {
