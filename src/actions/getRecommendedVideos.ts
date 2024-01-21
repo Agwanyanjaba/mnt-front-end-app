@@ -15,7 +15,7 @@ export async function getRecommendedVideos(
       pipeline: [
         {
           $search: {
-            index: "default",
+            index: "vid_search_index",
             moreLikeThis: {
               like: [
                 {

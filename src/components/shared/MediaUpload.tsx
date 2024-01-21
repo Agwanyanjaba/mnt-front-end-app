@@ -21,7 +21,7 @@ const MediaUpload: React.FC<React.PropsWithChildren<MediaUploadProps>> = ({
   return (
     <CldUploadWidget
       onUpload={handleUpload}
-      uploadPreset="c9iys8sc"
+      uploadPreset="e7oywva9"
       options={{ maxFiles: 1 }}
     >
       {({ open }) => {

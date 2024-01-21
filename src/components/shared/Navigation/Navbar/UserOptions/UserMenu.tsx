@@ -3,7 +3,7 @@
 import { signOut } from "next-auth/react";
 import MenuItem from "./MenuItem";
 
-import { PiUserSquareFill, PiYoutubeLogo, PiSignOut } from "react-icons/pi";
+import { PiUserSquareFill, PiComputerTowerBold, PiSignOut } from "react-icons/pi";
 import { useContext } from "react";
 import { CreateChannelModalContext } from "@/context/CreateChannelModalContext";
 import { CurrentChannelContext } from "@/context/CurrentChannelContext";
@@ -38,7 +38,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ onClose }) => {
           }}
         />
         <MenuItem
-          logo={<PiYoutubeLogo className="h-7 w-7 mr-4" />}
+          logo={<PiComputerTowerBold className="h-7 w-7 mr-4" />}
           label="Mziki Ni Tamu Studio"
           onClick={() => {
             if (!currentChannel) {
