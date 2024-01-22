@@ -8,10 +8,10 @@ const Logo = () => {
     <Link href="/">
       <Image
         alt="Logo"
-        className="hidden cursor-pointer mx-4 sm:block"
-        height="20"
-        width="90"
-        src="/images/logo.svg"
+        className="hidden cursor-pointer mx-4 my-0 sm:block"
+        height="40"
+        width="180"
+        src="/images/logo.jpeg"
       />
     </Link>
   );

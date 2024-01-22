@@ -30,7 +30,7 @@ const UserOptions = () => {
     <>
       <div className="flex items-center gap-4 mr-4">
         <IconButton onClick={handleUploadClick}>
-          <MdOutlineVideoCall className="h-7 w-7" />
+          <MdOutlineVideoCall className="h-14 w-14" />
         </IconButton>
         <Avatar
           size={AvatarSize.small}

@@ -34,7 +34,7 @@ const Sidebar: React.FC<SidebarProps> = ({ subscribedChannels }) => {
         />
       )}
       <div
-        className={`fixed w-64 bg-stone-950 z-40 mt-2 px-6 flex flex-col h-screen overflow-scroll no-scrollbar ${
+        className={`fixed w-90 bg-stone-950 z-40 mt-0 px-6 flex flex-col h-screen overflow-scroll no-scrollbar ${
           sidebar?.isOpen ? "translate-x-0" : "-translate-x-full"
         } ease-in-out duration-300`}
       >
@@ -42,14 +42,14 @@ const Sidebar: React.FC<SidebarProps> = ({ subscribedChannels }) => {
         <div className="pt-6 pb-3 border-b border-b-neutral-700">
           <MenuItem
             label="Home"
-            logo={<MdOutlineHome className="h-6 w-6 mr-4" />}
+            logo={<MdOutlineHome className="h-7 w-7 mr-4" />}
             round
             onClick={() => handleItemClick(() => router.push("/"))}
           />
           {currentUser ? (
             <MenuItem
               label="Subscriptions"
-              logo={<MdOutlineSubscriptions className="h-6 w-6 mr-4" />}
+              logo={<MdOutlineSubscriptions className="h-7 w-7 mr-4" />}
               round
               onClick={() =>
                 handleItemClick(() => router.push("/subscriptions"))

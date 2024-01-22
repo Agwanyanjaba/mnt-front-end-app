@@ -45,7 +45,7 @@ const Search = () => {
         value={text}
       />
       <button type="submit" className="px-3 bg-neutral-800 border-none">
-        <MdOutlineSearch className="h-6 w-6" />
+        <MdOutlineSearch className="h-14 w-14" />
       </button>
     </form>
   );
