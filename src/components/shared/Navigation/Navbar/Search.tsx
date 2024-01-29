@@ -34,7 +34,7 @@ const Search = () => {
 
   return (
     <form
-      className="flex flex-row border-[1px] border-neutral-700 rounded-full overflow-hidden w-2/5"
+      className="md:flex hidden flex-row border-[1px] border-neutral-700 rounded-full overflow-hidden w-2/5"
       onSubmit={handleSearch}
     >
       <input
@@ -45,7 +45,7 @@ const Search = () => {
         value={text}
       />
       <button type="submit" className="px-3 bg-neutral-800 border-none">
-        <MdOutlineSearch className="h-14 w-14" />
+        <MdOutlineSearch className="h-12 w-12" />
       </button>
     </form>
   );

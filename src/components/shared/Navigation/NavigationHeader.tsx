@@ -15,7 +15,7 @@ const NavigationHeader = () => {
           sidebar?.isOpen ? sidebar.onClose() : sidebar?.onOpen()
         }
       >
-        <MdMenu className="h-14 w-14" />
+        <MdMenu className="h-12 w-12" />
       </IconButton>
       <Logo />
     </div>
