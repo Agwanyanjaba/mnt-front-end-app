@@ -9,8 +9,8 @@ const Logo = () => {
       <Image
         alt="Logo"
         className="cursor-pointer mx-4 my-0 sm:block"
-        height="40"
-        width="180"
+        height="30"
+        width="150"
         src="/images/logo.jpeg"
       />
     </Link>

@@ -8,6 +8,7 @@ import queryString from "query-string";
 
 const Search = () => {
   const [text, setText] = useState("");
+  const [showFullWidthSearch, setFullWidthSearch] = useState(false);
 
   const router = useRouter();
 
@@ -28,26 +29,34 @@ const Search = () => {
       }
     );
 
-    console.log("The search URL "+url);
+    console.log("The search URL " + url);
     router.push(url);
   };
 
   return (
-    <form
-      className="md:flex hidden flex-row border-[1px] border-neutral-700 rounded-full overflow-hidden w-2/5"
-      onSubmit={handleSearch}
-    >
-      <input
-        type="text"
-        placeholder="Search"
-        className="w-full px-4 py-2 bg-neutral-900"
-        onChange={(e) => setText(e.target.value)}
-        value={text}
-      />
-      <button type="submit" className="px-3 bg-neutral-800 border-none">
-        <MdOutlineSearch className="h-12 w-12" />
-      </button>
-    </form>
+    <>
+      <form
+        className={`flex-row border-[1px] border-neutral-700 rounded-full overflow-hidden w-2/5
+        ${showFullWidthSearch? "flex":"hidden md:flex"}`}
+        onSubmit={handleSearch}
+      >
+        <input
+          type="text"
+          placeholder="Search"
+          className="w-full px-4 py-2 bg-neutral-900"
+          onChange={(e) => setText(e.target.value)}
+          value={text}
+        />
+        <button type="submit" className="px-3 bg-neutral-800 border-none">
+          <MdOutlineSearch className="h-12 w-12" />
+        </button>
+      </form>
+      <div hidden={showFullWidthSearch}>
+        <button onClick={() => setFullWidthSearch(true)} type="submit" className="px-3 mx-4 border-none hover:bg-neutral-800 my-5">
+          <MdOutlineSearch className="h-12 w-12 md:hidden" />
+        </button>
+      </div>
+    </>
   );
 };
 
