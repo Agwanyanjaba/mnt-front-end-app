@@ -11,7 +11,6 @@ import getCurrentChannel from "@/actions/getCurrentChannel";
 import CurrentChannelProvider from "@/context/CurrentChannelContext";
 import UploadVideoModalProvider from "@/context/UploadVideoModalContext";
 import SidebarProvider from "@/context/SidebarContext";
-import LoginForm from "./login"; // Import your login component
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -30,11 +29,6 @@ export default async function RootLayout({
 }) {
   const currentUser = await getCurrentUser();
   const currentChannel = await getCurrentChannel();
-
-  // Check if currentUser exists, if not, render login component
-  if (!currentUser) {
-    return <LoginForm />;
-  }
 
   return (
     <html lang="en">
