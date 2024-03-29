@@ -18,7 +18,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Mziki Ni Tamu",
+  title: "Mziki Ni Tamu | 365",
   description: "Broadcast Yourself",
 };
 
