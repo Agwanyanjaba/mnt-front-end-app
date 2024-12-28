@@ -11,43 +11,60 @@ import getCurrentChannel from "@/actions/getCurrentChannel";
 import CurrentChannelProvider from "@/context/CurrentChannelContext";
 import UploadVideoModalProvider from "@/context/UploadVideoModalContext";
 import SidebarProvider from "@/context/SidebarContext";
-
+import {PaidSubscriptionProvider} from "@/context/PaidSubscriptionContext";
+import SignInModal from "@/components/shared/Modal/SignInModal";
+import getPaidSubscriptions from "@/actions/getPaidSubscriptions";
+import PhoneNumberModalClient from "@/components/shared/Modal/PhoneNumberModalClient";
 const roboto = Roboto({
-  subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700", "900"],
+    subsets: ["latin"],
+    weight: ["100", "300", "400", "500", "700", "900"],
 });
 
 export const metadata: Metadata = {
-  title: "YouTube",
-  description: "Broadcast Yourself",
+    title: "YouTube",
+    description: "Broadcast Yourself",
 };
 
 export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
+                                             children,
+                                         }: {
+    children: React.ReactNode;
 }) {
-  const currentUser = await getCurrentUser();
-  const currentChannel = await getCurrentChannel();
+    const currentUser = await getCurrentUser();
+    const currentChannel = await getCurrentChannel();
+    console.log("===email", currentUser?.email);
+    const paidSubscription = await getPaidSubscriptions(currentUser?.id ?? null);
 
-  return (
-    <html lang="en">
-      <body className={roboto.className}>
+    console.log("==subscription",paidSubscription);
+
+    return (
+        <html lang="en">
+        <body className={roboto.className}>
+        {/* Display SignInModal if no currentUser */}
+        {!currentUser?.email && <SignInModal />}
+        {!paidSubscription && currentUser?.id && (
+            <PhoneNumberModalClient
+                userId={currentUser.id}
+                phoneNumber={currentUser.phoneNumber}
+            />
+        )}
         <CreateChannelModalProvider>
-          <Toaster toastOptions={{ position: "bottom-left" }} />
-          <CreateChannelModal />
-          <CurrentUserProvider user={currentUser}>
-            <CurrentChannelProvider channel={currentChannel}>
-              <UploadVideoModalProvider>
-                <SidebarProvider>
-                  <Navigation />
-                  <div className="pt-16">{children}</div>
-                </SidebarProvider>
-              </UploadVideoModalProvider>
-            </CurrentChannelProvider>
-          </CurrentUserProvider>
+            <Toaster toastOptions={{ position: "bottom-left" }} />
+            <CreateChannelModal />
+            <CurrentUserProvider user={currentUser}>
+                <CurrentChannelProvider channel={currentChannel}>
+                    <UploadVideoModalProvider>
+                        <SidebarProvider>
+                            <PaidSubscriptionProvider email={currentUser?.email ?? null}> {/* Provide the email of the logged-in user */}
+                            <Navigation />
+                            <div className="pt-16">{children}</div>
+                            </PaidSubscriptionProvider>
+                        </SidebarProvider>
+                    </UploadVideoModalProvider>
+                </CurrentChannelProvider>
+            </CurrentUserProvider>
         </CreateChannelModalProvider>
-      </body>
-    </html>
-  );
+        </body>
+        </html>
+    );
 }
