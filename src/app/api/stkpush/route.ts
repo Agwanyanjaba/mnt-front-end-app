@@ -83,7 +83,7 @@ async function initiateStkPush(phoneNumber: string, userId: string) {
         PartyA: formattedPhoneNumber,
         PartyB: shortCode,
         PhoneNumber: formattedPhoneNumber,
-        CallBackURL: "https://mydomain.com/path", // Replace with your callback URL
+        CallBackURL: process.env.PAYMENT_CALLBACK_URL+"/api/stkpushcallback",
         AccountReference: "MzikiNiTamu",
         TransactionDesc: "Payment of Mziki Ni Tamu Subscription",
     };

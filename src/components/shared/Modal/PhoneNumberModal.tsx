@@ -1,14 +1,16 @@
-"use client";
-
 import { useState } from "react";
 
 interface PhoneNumberModalProps {
     userId: string;
     initialPhoneNumber: string | null;
-    onSuccess: () => void;
+    onSuccess?: () => void; // Optional prop with a default fallback
 }
 
-const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({ userId, initialPhoneNumber, onSuccess }) => {
+const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
+                                                               userId,
+                                                               initialPhoneNumber,
+                                                               onSuccess = () => {}, // Default no-op function
+                                                           }) => {
     const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || "");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
@@ -18,13 +20,33 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({ userId, initialPhon
         setError(null);
 
         try {
-            await initiatePayment(phoneNumber, userId); // Call initiatePayment here
-            onSuccess(); // Notify parent component of success
+            const paymentResponse = await initiatePayment(phoneNumber, userId); // Call initiatePayment here
+
+            // Parse the paymentResponse as JSON
+            const parsedResponse = JSON.parse(paymentResponse);
+
+            // Extract the necessary fields
+            const { ResponseCode, CheckoutRequestID } = parsedResponse.data;
+
+            if (ResponseCode === "0") {
+                //process the callback response
+                const paymentConfirmationResponse = await confirmPayment(CheckoutRequestID);
+                if (paymentConfirmationResponse) {
+                    onSuccess(); // Notify parent component of success
+                }
+
+                console.log("Payment confirmation response:", paymentConfirmationResponse);
+            } else {
+                setError("Payment initiation failed. Please try again.");
+            }
+
+
         } catch (err: any) {
             setError(err.message || "Failed to initiate payment. Please try again.");
         } finally {
             setLoading(false);
         }
+
     };
 
     return (
@@ -61,8 +83,7 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({ userId, initialPhon
     );
 };
 
-// Function to initiate payment by calling the API
-const initiatePayment = async (phoneNumber: string, userId: string) => {
+const initiatePayment = async (phoneNumber: string, userId: string): Promise<string> => {
     try {
         const response = await fetch("/api/stkpush", {
             method: "POST",
@@ -71,19 +92,41 @@ const initiatePayment = async (phoneNumber: string, userId: string) => {
             },
             body: JSON.stringify({ phoneNumber, userId }),
         });
-        console.log("Response text:", response.text()); // Log the raw response
-        const text = await response.text(); // Read the raw response as text
 
-
-        // Check if the response is valid JSON
-        try {
-            const data = JSON.parse(text); // Try parsing as JSON
-            console.log(data); // Handle the response as needed
-        } catch (e) {
-            console.error("Invalid JSON response:", e);
+        if (!response.ok) {
+            throw new Error("Failed to initiate payment");
         }
+
+        const responseText = await response.text();
+        console.log("=Payment Response from Backed", responseText);
+        return responseText; // Return the raw response as a string
     } catch (error) {
         console.error("Error initiating payment:", error);
+        throw error;
+    }
+};
+
+
+const confirmPayment = async (checkoutRequestID: string) => {
+    console.log("Request checkout id", checkoutRequestID);
+    try {
+        const response = await fetch("/api/paymentconfirmation", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ checkoutRequestID }),
+        });
+        console.log("=Payment Confirmation Response  ", response);
+        if(!response.ok){
+            throw  new Error("Failed to confirm payment");
+        }
+        const responseText = await response.text();
+        console.log(responseText);
+        return responseText;
+    } catch (error) {
+        console.error("Error initiating payment:", error);
+        throw error; // Rethrow the error for the caller to handle
     }
 };
 
