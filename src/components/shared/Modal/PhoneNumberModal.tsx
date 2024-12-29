@@ -23,9 +23,14 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
 
         try {
             // Step 1: Initiate Payment
-            const { responseText } = await initiatePayment(phoneNumber, userId);
-            const parsedResponse = JSON.parse(responseText);
-            const { ResponseCode, CheckoutRequestID } = parsedResponse.data;
+            const { success, data, errorMessage } = await initiatePayment(phoneNumber, userId);
+
+            if (!success) {
+                setError(errorMessage || "Payment initiation failed. Please try again.");
+                return;
+            }
+
+            const { ResponseCode, CheckoutRequestID, ResponseDescription, CustomerMessage } = data;
 
             if (ResponseCode === "0") {
                 const subscriptionAmount = 300; // Subscription amount
@@ -58,7 +63,8 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
                 console.log("Subscription created or updated:", subscription);
 
                 // Notify parent component of success
-                onSuccess();
+                onSuccess(); // Notify the parent component to close the modal
+                if (onClose) onClose(); // Ensure the modal is closed
             } else {
                 setError("Payment initiation failed. Please try again.");
             }
@@ -103,7 +109,7 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
     );
 };
 
-const initiatePayment = async (phoneNumber: string, userId: string): Promise<{ responseText: string }> => {
+const initiatePayment = async (phoneNumber: string, userId: string): Promise<{ success: boolean; data?: any; errorMessage?: string }> => {
     try {
         const response = await fetch("/api/stkpush", {
             method: "POST",
@@ -113,15 +119,41 @@ const initiatePayment = async (phoneNumber: string, userId: string): Promise<{ r
             body: JSON.stringify({ phoneNumber, userId }),
         });
 
-        if (!response.ok) {
-            throw new Error("Failed to initiate payment");
+        const responseText = await response.text();
+        let parsedResponse;
+
+        // Parse the response text as JSON
+        try {
+            parsedResponse = JSON.parse(responseText);
+        } catch (error) {
+            throw new Error("Failed to parse the response text.");
         }
 
-        const responseText = await response.text();
-        return { responseText };
+        if (!response.ok) {
+            const errorMessage = parsedResponse?.error || "Failed to initiate payment";
+            return { success: false, errorMessage };
+        }
+
+        if (parsedResponse?.message === "STK Push initiated successfully") {
+            const { MerchantRequestID, CheckoutRequestID, ResponseCode, ResponseDescription, CustomerMessage } = parsedResponse?.data;
+            return {
+                success: true,
+                data: {
+                    MerchantRequestID,
+                    CheckoutRequestID,
+                    ResponseCode,
+                    ResponseDescription,
+                    CustomerMessage,
+                }
+            };
+        }
+
+        throw new Error("Unexpected response format");
+
     } catch (error) {
         console.error("Error initiating payment:", error);
-        throw error;
+        // @ts-ignore
+        return { success: false, errorMessage: error.message || "Failed to initiate payment" };
     }
 };
 

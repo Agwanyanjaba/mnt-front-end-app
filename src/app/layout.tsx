@@ -32,6 +32,7 @@ export default async function RootLayout({
 }) {
     const currentUser = await getCurrentUser();
     const currentChannel = await getCurrentChannel();
+    console.log("Current USER ", currentUser);
     console.log("===email", currentUser?.email);
     const paidSubscription = await getPaidSubscriptions(currentUser?.id ?? null);
 
@@ -42,7 +43,7 @@ export default async function RootLayout({
         <body className={roboto.className}>
         {/* Display SignInModal if no currentUser */}
         {!currentUser?.email && <SignInModal />}
-        {!paidSubscription && currentUser?.id && (
+        {paidSubscription?.status !== 'ACTIVE' && currentUser?.id && (
             <PhoneNumberModalClient
                 userId={currentUser.id}
                 phoneNumber={currentUser.phoneNumber}

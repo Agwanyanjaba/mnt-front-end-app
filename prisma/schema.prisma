@@ -11,7 +11,7 @@ model User {
   id                   String         @id @default(auto()) @map("_id") @db.ObjectId
   name                 String?
   email                String?        @unique
-  phoneNumber          String?        @unique
+  phoneNumber          String?
   emailVerified        DateTime?
   image                String?
   createdAt            DateTime       @default(now())
@@ -21,12 +21,14 @@ model User {
   account              Account?
   channel              Channel?
   subscriptions        Subscription[] // Link to Subscription model
+
+  @@unique([email, phoneNumber], name: "unique_email_phone_number_subscription")
 }
 
 model Subscription {
   id          String             @id @default(auto()) @map("_id") @db.ObjectId
   userId      String             @db.ObjectId // Foreign key to User
-  phoneNumber String?            @unique
+  phoneNumber String?
   user        User               @relation(fields: [userId], references: [id])
   amount      Float
   startDate   DateTime
@@ -34,8 +36,6 @@ model Subscription {
   status      SubscriptionStatus
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
-
-  @@unique([userId, status, phoneNumber], name: "unique_active_phone_number_subscription") // Ensures only one active subscription per user
 }
 
 enum SubscriptionStatus {

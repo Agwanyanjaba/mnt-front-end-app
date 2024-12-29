@@ -8,11 +8,18 @@ interface PhoneNumberModalClientProps {
     phoneNumber: string | null;
 }
 
-const PhoneNumberModalClient: React.FC<PhoneNumberModalClientProps> = ({ userId, phoneNumber }) => {
+const PhoneNumberModalClient: React.FC<PhoneNumberModalClientProps> = ({
+                                                                           userId,
+                                                                           phoneNumber,
+                                                                       }) => {
     const [isOpen, setIsOpen] = useState(true); // Modal opens initially
 
     const handleClose = () => {
         setIsOpen(false); // Close the modal
+    };
+
+    const handleSuccess = () => {
+        setIsOpen(false); // Close the modal when success happens
     };
 
     return (
@@ -21,7 +28,8 @@ const PhoneNumberModalClient: React.FC<PhoneNumberModalClientProps> = ({ userId,
                 <PhoneNumberModal
                     userId={userId}
                     initialPhoneNumber={phoneNumber}
-                    onClose={handleClose}
+                    onSuccess={handleSuccess} // Handle success to close the modal
+                    onClose={handleClose} // Pass onClose to be triggered inside the modal
                 />
             )}
         </>
