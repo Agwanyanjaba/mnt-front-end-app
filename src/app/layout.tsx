@@ -21,8 +21,8 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-    title: "YouTube",
-    description: "Broadcast Yourself",
+    title: "Mziki Ni Tamu",
+    description: "Ngoma Za Hekima ",
 };
 
 export default async function RootLayout({

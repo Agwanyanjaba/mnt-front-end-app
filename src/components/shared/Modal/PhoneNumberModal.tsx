@@ -18,10 +18,10 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({ userId, initialPhon
         setError(null);
 
         try {
-            await savePhoneNumber(userId, phoneNumber);
+            await initiatePayment(phoneNumber, userId); // Call initiatePayment here
             onSuccess(); // Notify parent component of success
         } catch (err: any) {
-            setError(err.message || "Failed to update phone number. Please try again.");
+            setError(err.message || "Failed to initiate payment. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -35,9 +35,8 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({ userId, initialPhon
                     alt="Logo"
                     className="mx-auto mb-4 w-32 h-auto rounded-lg"
                 />
-                <h2 className="text-xl font-bold mb-4">Update Phone Number</h2>
                 <p className="text-gray-600 mb-4">
-                    Please provide your phone number to continue.
+                    Please provide your phone number to continue. KSh. 300 will be charged.
                 </p>
                 <input
                     type="tel"
@@ -62,19 +61,30 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({ userId, initialPhon
     );
 };
 
-async function savePhoneNumber(userId: string, phoneNumber: string): Promise<void> {
-    console.log("==", phoneNumber, userId);
-    const response = await fetch("/api/update-phone-number", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId, phoneNumber }),
-    });
+// Function to initiate payment by calling the API
+const initiatePayment = async (phoneNumber: string, userId: string) => {
+    try {
+        const response = await fetch("/api/stkpush", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ phoneNumber, userId }),
+        });
+        console.log("Response text:", response.text()); // Log the raw response
+        const text = await response.text(); // Read the raw response as text
 
-    if (!response.ok) {
-        throw new Error("Failed to update phone number.");
+
+        // Check if the response is valid JSON
+        try {
+            const data = JSON.parse(text); // Try parsing as JSON
+            console.log(data); // Handle the response as needed
+        } catch (e) {
+            console.error("Invalid JSON response:", e);
+        }
+    } catch (error) {
+        console.error("Error initiating payment:", error);
     }
-}
+};
 
 export default PhoneNumberModal;
