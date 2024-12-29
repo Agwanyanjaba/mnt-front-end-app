@@ -5,10 +5,8 @@ import axios from "axios";
 // @method POST
 // @route /stkPushCallback/:Order_ID
 // @access public
-export async function POST(request: Request, { params }: { params: { Order_ID: string } }) {
+export async function POST(request: Request) {
     try {
-        // Extract Order_ID from the URL parameters
-        const { Order_ID } = params;
 
         // Get the callback data from Safaricom
         const body = await request.json();
@@ -33,7 +31,6 @@ export async function POST(request: Request, { params }: { params: { Order_ID: s
         // Log the received callback details for debugging
         console.log("-".repeat(20), " CALLBACK RECEIVED ", "-".repeat(20));
         console.log(`
-            Order_ID : ${Order_ID},
             MerchantRequestID : ${MerchantRequestID},
             CheckoutRequestID: ${CheckoutRequestID},
             ResultCode: ${ResultCode},
@@ -45,17 +42,17 @@ export async function POST(request: Request, { params }: { params: { Order_ID: s
         `);
 
         // Optionally, you can send the data to your database or another API for processing
-        await axios.post('your-database-or-transaction-api-endpoint', {
-            Order_ID,
-            MerchantRequestID,
-            CheckoutRequestID,
-            ResultCode,
-            ResultDesc,
-            PhoneNumber,
-            Amount,
-            MpesaReceiptNumber,
-            TransactionDate,
-        });
+        // await axios.post('your-database-or-transaction-api-endpoint', {
+        //     Payment_ID,
+        //     MerchantRequestID,
+        //     CheckoutRequestID,
+        //     ResultCode,
+        //     ResultDesc,
+        //     PhoneNumber,
+        //     Amount,
+        //     MpesaReceiptNumber,
+        //     TransactionDate,
+        // });
 
         // Respond with a success message
         return NextResponse.json({

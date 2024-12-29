@@ -11,9 +11,9 @@ model User {
   id                   String         @id @default(auto()) @map("_id") @db.ObjectId
   name                 String?
   email                String?        @unique
+  phoneNumber          String?        @unique
   emailVerified        DateTime?
   image                String?
-  phoneNumber          String?
   createdAt            DateTime       @default(now())
   subscribedChannelIds String[]       @db.ObjectId
   likedVideoIds        String[]       @db.ObjectId
@@ -21,22 +21,21 @@ model User {
   account              Account?
   channel              Channel?
   subscriptions        Subscription[] // Link to Subscription model
-
-  @@unique([email, phoneNumber], name: "unique_phone_email_subscription")
 }
 
 model Subscription {
-  id         String             @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String             @db.ObjectId // Foreign key to User
-  user       User               @relation(fields: [userId], references: [id])
-  amount     Float
-  startDate  DateTime
-  expiryDate DateTime
-  status     SubscriptionStatus
-  createdAt  DateTime           @default(now())
-  updatedAt  DateTime           @updatedAt
+  id          String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String             @db.ObjectId // Foreign key to User
+  phoneNumber String?            @unique
+  user        User               @relation(fields: [userId], references: [id])
+  amount      Float
+  startDate   DateTime
+  expiryDate  DateTime
+  status      SubscriptionStatus
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
-  @@unique([userId, status], name: "unique_active_subscription") // Ensures only one active subscription per user
+  @@unique([userId, status, phoneNumber], name: "unique_active_phone_number_subscription") // Ensures only one active subscription per user
 }
 
 enum SubscriptionStatus {

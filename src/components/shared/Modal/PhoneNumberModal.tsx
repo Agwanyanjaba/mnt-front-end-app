@@ -3,13 +3,15 @@ import { useState } from "react";
 interface PhoneNumberModalProps {
     userId: string;
     initialPhoneNumber: string | null;
-    onSuccess?: () => void; // Optional prop with a default fallback
+    onSuccess?: () => void;
+    onClose?: () => void;
 }
 
 const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
                                                                userId,
                                                                initialPhoneNumber,
-                                                               onSuccess = () => {}, // Default no-op function
+                                                               onSuccess = () => {},
+                                                               onClose,
                                                            }) => {
     const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || "");
     const [error, setError] = useState<string | null>(null);
@@ -20,33 +22,52 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
         setError(null);
 
         try {
-            const paymentResponse = await initiatePayment(phoneNumber, userId); // Call initiatePayment here
-
-            // Parse the paymentResponse as JSON
-            const parsedResponse = JSON.parse(paymentResponse);
-
-            // Extract the necessary fields
+            // Step 1: Initiate Payment
+            const { responseText } = await initiatePayment(phoneNumber, userId);
+            const parsedResponse = JSON.parse(responseText);
             const { ResponseCode, CheckoutRequestID } = parsedResponse.data;
 
             if (ResponseCode === "0") {
-                //process the callback response
-                const paymentConfirmationResponse = await confirmPayment(CheckoutRequestID);
-                if (paymentConfirmationResponse) {
-                    onSuccess(); // Notify parent component of success
+                const subscriptionAmount = 300; // Subscription amount
+                const status: "ACTIVE" = "ACTIVE"; // Subscription status
+                const startDate = new Date();
+                const expiryDate = new Date();
+                expiryDate.setDate(startDate.getDate() + 30);
+
+                // Step 2: Create or Update Subscription via Backend API
+                const subscriptionResponse = await fetch("/api/subscription", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        userId,
+                        amount: subscriptionAmount,
+                        phoneNumber,
+                        startDate: startDate.toISOString(),
+                        expiryDate: expiryDate.toISOString(),
+                        status,
+                    }),
+                });
+
+                if (!subscriptionResponse.ok) {
+                    throw new Error("Failed to create or update subscription.");
                 }
 
-                console.log("Payment confirmation response:", paymentConfirmationResponse);
+                const subscription = await subscriptionResponse.json();
+                console.log("Subscription created or updated:", subscription);
+
+                // Notify parent component of success
+                onSuccess();
             } else {
                 setError("Payment initiation failed. Please try again.");
             }
-
-
         } catch (err: any) {
-            setError(err.message || "Failed to initiate payment. Please try again.");
+            setError(err.message || "Failed to process your subscription.");
+            console.error("Error:", err);
         } finally {
             setLoading(false);
         }
-
     };
 
     return (
@@ -67,7 +88,6 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                 />
-
                 {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
                 <div className="flex justify-center">
                     <button
@@ -83,7 +103,7 @@ const PhoneNumberModal: React.FC<PhoneNumberModalProps> = ({
     );
 };
 
-const initiatePayment = async (phoneNumber: string, userId: string): Promise<string> => {
+const initiatePayment = async (phoneNumber: string, userId: string): Promise<{ responseText: string }> => {
     try {
         const response = await fetch("/api/stkpush", {
             method: "POST",
@@ -98,35 +118,10 @@ const initiatePayment = async (phoneNumber: string, userId: string): Promise<str
         }
 
         const responseText = await response.text();
-        console.log("=Payment Response from Backed", responseText);
-        return responseText; // Return the raw response as a string
+        return { responseText };
     } catch (error) {
         console.error("Error initiating payment:", error);
         throw error;
-    }
-};
-
-
-const confirmPayment = async (checkoutRequestID: string) => {
-    console.log("Request checkout id", checkoutRequestID);
-    try {
-        const response = await fetch("/api/paymentconfirmation", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ checkoutRequestID }),
-        });
-        console.log("=Payment Confirmation Response  ", response);
-        if(!response.ok){
-            throw  new Error("Failed to confirm payment");
-        }
-        const responseText = await response.text();
-        console.log(responseText);
-        return responseText;
-    } catch (error) {
-        console.error("Error initiating payment:", error);
-        throw error; // Rethrow the error for the caller to handle
     }
 };
 

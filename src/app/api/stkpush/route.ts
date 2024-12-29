@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import {getTimestamp} from "@/utils/timeStamp";
 export async function POST(request: Request) {
     try {
         const { phoneNumber, userId } = await request.json();
@@ -19,18 +20,6 @@ export async function POST(request: Request) {
     }
 
 }
-
-const generateTimestamp = (): string => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const date = String(now.getDate()).padStart(2, "0");
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    return `${year}${month}${date}${hours}${minutes}${seconds}`;
-};
-
 
 // Function to generate M-Pesa authentication token
 async function generateMpesaAuthToken(consumerKey: string, consumerSecret: string): Promise<string> {
@@ -64,10 +53,11 @@ async function initiateStkPush(phoneNumber: string, userId: string) {
     headers.append("Authorization", `Bearer ${token}`);
     headers.append("Content-Type", "application/json");
 
-    const shortCode = "174379"; // Business Short Code
-    const passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"; // Pass Key
-    const timestamp = generateTimestamp();
+    const shortCode = process.env.BUSINESS_SHORT_CODE; // Business Short Code
+    const passkey = process.env.PASS_KEY;
+    const timestamp = getTimestamp();
     console.log("Timestamp", timestamp);
+    // @ts-ignore
     const password = Buffer.from(shortCode + passkey + timestamp).toString("base64");
 
     const formattedPhoneNumber = phoneNumber.startsWith("0")
@@ -75,20 +65,24 @@ async function initiateStkPush(phoneNumber: string, userId: string) {
         : phoneNumber;
 
     const requestBody = {
-        BusinessShortCode: shortCode,
+        BusinessShortCode: process.env.BUSINESS_SHORT_CODE,
         Password: password,
         Timestamp: timestamp,
         TransactionType: "CustomerPayBillOnline",
-        Amount: 1,
+        Amount: process.env.MNT_FEE,
         PartyA: formattedPhoneNumber,
-        PartyB: shortCode,
+        PartyB: process.env.BUSINESS_SHORT_CODE,
         PhoneNumber: formattedPhoneNumber,
-        CallBackURL: process.env.PAYMENT_CALLBACK_URL+"/api/stkpushcallback",
+        CallBackURL: process.env.MPESA_CALLBACK_URL,
         AccountReference: "MzikiNiTamu",
         TransactionDesc: "Payment of Mziki Ni Tamu Subscription",
     };
 
-    const response = await fetch("https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest", {
+    console.log("=Request Body:", requestBody);
+    console.log("headers", headers);
+    console.log("SAF URL", process.env.PAYMENT_URL)
+    // @ts-ignore
+    const response = await fetch(process.env.PAYMENT_URL, {
         method: "POST",
         headers: headers,
         body: JSON.stringify(requestBody),
